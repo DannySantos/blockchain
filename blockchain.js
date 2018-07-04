@@ -23,7 +23,7 @@ class Block {
   
   mineBlock(difficulty) {
     while(this.hash.substring(0, difficulty) !== Array(difficulty + 1).join("0")) {
-      this.nonce++
+      this.nonce++;
       this.hash = this.calculateHash();
     }
     
@@ -49,9 +49,11 @@ class Blockchain {
 
   minePendingTransactions(miningRewardAddress) {
     let block = new Block(Date.now(), this.pendingTransactions);
+    block.previousHash = this.getLatestBlock().hash;
     block.mineBlock(this.difficulty);
     
     console.log("Block successfully mined");
+    
     this.chain.push(block);
     
     this.pendingTransactions = [
@@ -93,9 +95,9 @@ class Blockchain {
       if(currentBlock.previousHash !== previousBlock.hash) {
         return false;
       }
-      
-      return true;
     }
+    
+    return true;
   }
 }
 
@@ -111,3 +113,11 @@ console.log("\nBalance of Danny's Address: " + dannyCoin.getBalanceOfAddress("ad
 
 dannyCoin.minePendingTransactions("dannys-address");
 console.log("\nBalance of Danny's Address: " + dannyCoin.getBalanceOfAddress("dannys-address"));
+
+dannyCoin.chain[1].transactions = [dannyCoin.createTransaction(new Transaction("address1", "dannys-address", 10000))]
+dannyCoin.chain[1].hash = dannyCoin.chain[1].calculateHash();
+
+dannyCoin.chain[2].previousHash = dannyCoin.chain[1].calculateHash();
+dannyCoin.chain[2].hash = dannyCoin.chain[2].calculateHash();
+
+console.log("\nIs chain valid? " + dannyCoin.isChainValid());
